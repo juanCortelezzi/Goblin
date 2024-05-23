@@ -8,29 +8,13 @@ defmodule GoblinServer.Handler do
   alias GoblinServer.Packet
   alias GoblinServer.Handler.State
 
-  defp handle_packet(%Packet{} = packet, socket, %State{} = _state) do
-    IO.inspect(["Received:", packet])
-    payload = GoblinServer.Packet.to_binary(packet)
-    :ok = ThousandIsland.Socket.send(socket, payload)
-  end
-
-  defp parse_packets(data, packets \\ []) when is_binary(data) do
-    case GoblinServer.Packet.from_binary(data) do
-      {:ok, {packet, <<>>}} ->
-        {:ok, Enum.reverse([packet | packets])}
-
-      {:ok, {packet, rest}} ->
-        parse_packets(rest, [packet | packets])
-    end
-  end
-
   @impl ThousandIsland.Handler
   def handle_connection(_, _) do
     {:continue, %State{}}
   end
 
   @impl ThousandIsland.Handler
-  def handle_data(data, socket, %State{} = state) do
+  def handle_data(data, %ThousandIsland.Socket{} = socket, %State{} = state) do
     message = state.previous <> data
 
     IO.inspect(["Processing Message:", message])
@@ -52,19 +36,26 @@ defmodule GoblinServer.Handler do
   end
 
   @impl ThousandIsland.Handler
-  def handle_error(reason, _socket, _state) do
+  def handle_error(reason, %ThousandIsland.Socket{} = _socket, %State{} = _state) do
     IO.inspect(["Error:", reason])
   end
 
-  # @impl ThousandIsland.Handler
-  # def handle_data(data, socket, state) do
-  #   with {:ok, package} <- GoblinServer.Packet.from_binary(data) do
-  #     IO.inspect(["Received:", package])
-  #     payload = GoblinServer.Packet.to_binary(package)
-  #     :ok = ThousandIsland.Socket.send(socket, payload)
-  #     {:continue, state}
-  #   else
-  #     {:error, _} -> {:error, "Invalid package", state}
-  #   end
-  # end
+  defp parse_packets(data, packets \\ []) when is_binary(data) do
+    case GoblinServer.Packet.from_binary(data) do
+      {:ok, {packet, <<>>}} ->
+        {:ok, Enum.reverse([packet | packets])}
+
+      {:ok, {packet, rest}} ->
+        parse_packets(rest, [packet | packets])
+
+      other ->
+        other
+    end
+  end
+
+  defp handle_packet(%Packet{} = packet, %ThousandIsland.Socket{} = socket, %State{} = _state) do
+    IO.inspect(["Received:", packet])
+    payload = GoblinServer.Packet.to_binary(packet)
+    :ok = ThousandIsland.Socket.send(socket, payload)
+  end
 end

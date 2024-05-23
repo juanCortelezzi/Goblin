@@ -30,23 +30,20 @@ defmodule GoblinTest do
   test "big echo" do
     socket = connect()
 
+    messages = [
+      create_big_ass_message(<<1, 0, 255, 1>>),
+      create_big_ass_message(<<1, 0, 255, 2>>),
+      create_big_ass_message(<<1, 0, 255, 3>>),
+      create_big_ass_message(<<1, 0, 255, 4>>),
+      create_big_ass_message(<<1, 0, 255, 5>>)
+    ]
+
     # bam = Big.Ass.Message
-    message_one = create_big_ass_message(<<1, 0, 255, 1>>)
-    message_two = create_big_ass_message(<<1, 0, 255, 2>>)
-    message_three = create_big_ass_message(<<1, 0, 255, 3>>)
-    message_four = create_big_ass_message(<<1, 0, 255, 4>>)
-
-    bam =
-      message_one <>
-        message_two <>
-        message_three <>
-        message_four
-
+    bam = Enum.reduce(messages, <<>>, fn msg, acc -> acc <> msg end)
     :ok = :gen_tcp.send(socket, bam)
 
-    assert {:ok, ^message_one} = :gen_tcp.recv(socket, 0)
-    assert {:ok, ^message_two} = :gen_tcp.recv(socket, 0)
-    assert {:ok, ^message_three} = :gen_tcp.recv(socket, 0)
-    assert {:ok, ^message_four} = :gen_tcp.recv(socket, 0)
+    for msg <- messages do
+      {:ok, ^msg} = :gen_tcp.recv(socket, 0)
+    end
   end
 end
