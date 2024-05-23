@@ -1,14 +1,14 @@
-defmodule GoblinServer.Packet do
-  @doc ~S"""
-  Packet and payload definitions for the Goblin protocol.
+defmodule GoblinServer.Package do
+  @moduledoc ~S"""
+  Package and payload definitions for the Goblin protocol.
 
   ## Examples
 
-    iex> GoblinServer.Packet.from_binary(<<1, 0, 0>>)
-    {:ok, {%GoblinServer.Packet{version: 1, type: :echo, length: 0, payload: ""}, ""}}
+    iex> GoblinServer.Package.from_binary(<<1, 0, 0>>)
+    {:ok, {%GoblinServer.Package{version: 1, type: :echo, length: 0, payload: ""}, ""}}
 
-    iex> GoblinServer.Packet.from_binary(<<1, 0, 2, "hi">>)
-    {:ok, {%GoblinServer.Packet{version: 1, type: :echo, length: 2, payload: "hi"}, ""}}
+    iex> GoblinServer.Package.from_binary(<<1, 0, 2, "hi">>)
+    {:ok, {%GoblinServer.Package{version: 1, type: :echo, length: 2, payload: "hi"}, ""}}
 
   """
   defstruct [:version, :type, :length, :payload]
@@ -18,7 +18,7 @@ defmodule GoblinServer.Packet do
   end
 
   @version 1
-  @packet_types [:echo, :location]
+  @package_types [:echo, :location]
 
   def from_binary(<<version::integer>> <> _)
       when version != @version,
@@ -26,7 +26,7 @@ defmodule GoblinServer.Packet do
 
   def from_binary(<<@version, type::integer>> <> _)
       when type < 0
-      when type >= length(@packet_types),
+      when type >= length(@package_types),
       do: {:error, :invalid_type}
 
   def from_binary(<<
@@ -47,32 +47,32 @@ defmodule GoblinServer.Packet do
           payload::binary-size(length)
         >> <> rest
       ) do
-    type = Enum.at(@packet_types, type)
+    type = Enum.at(@package_types, type)
 
     with {:ok, payload} <- payload_from_binary(type, payload) do
-      packet = %GoblinServer.Packet{
+      package = %GoblinServer.Package{
         version: @version,
         type: type,
         length: length,
         payload: payload
       }
 
-      {:ok, {packet, rest}}
+      {:ok, {package, rest}}
     end
   end
 
-  def from_binary(_), do: {:error, :invalid_packet}
+  def from_binary(_), do: {:error, :invalid_package}
 
-  def to_binary(%GoblinServer.Packet{
+  def to_binary(%GoblinServer.Package{
         version: version,
         type: type,
         length: length,
         payload: payload
       }) do
     payload = payload_to_binary(type, payload)
-    type = Enum.find_index(@packet_types, fn e -> e == type end)
+    type = Enum.find_index(@package_types, fn e -> e == type end)
 
-    packet = <<
+    package = <<
       version::integer-size(8),
       type::integer-size(8),
       length::integer-size(8),
@@ -82,12 +82,12 @@ defmodule GoblinServer.Packet do
     # Ensure the length is correct (sanity check)
     ^length = byte_size(payload)
 
-    packet
+    package
   end
 
   # Payload from binary
 
-  def payload_from_binary(type, _) when type not in @packet_types do
+  def payload_from_binary(type, _) when type not in @package_types do
     {:err, :invalid_payload}
   end
 
@@ -120,7 +120,7 @@ defmodule GoblinServer.Packet do
 
   # Payload to binary
 
-  def payload_to_binary(:location, %GoblinServer.Packet.Payload.Location{
+  def payload_to_binary(:location, %GoblinServer.Package.Payload.Location{
         id: id,
         unix_timestamp: unix_timestamp,
         latitude: latitude,
