@@ -43,7 +43,7 @@ defmodule GoblinTest do
     :ok = :gen_tcp.send(socket, bam)
 
     for msg <- messages do
-      assert {:ok, ^msg} = :gen_tcp.recv(socket, 0)
+      assert {:ok, ^msg} = :gen_tcp.recv(socket, byte_size(msg))
     end
   end
 end

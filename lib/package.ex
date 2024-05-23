@@ -20,11 +20,11 @@ defmodule GoblinServer.Package do
   @version 1
   @package_types [:echo, :location]
 
-  def from_binary(<<version::integer>> <> _)
+  def from_binary(<<version::integer, _::binary>>)
       when version != @version,
       do: {:error, :invalid_version}
 
-  def from_binary(<<@version, type::integer>> <> _)
+  def from_binary(<<@version, type::integer, _::binary>>)
       when type < 0
       when type >= length(@package_types),
       do: {:error, :invalid_type}

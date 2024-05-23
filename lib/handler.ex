@@ -19,6 +19,7 @@ defmodule GoblinServer.Handler do
 
     case GoblinServer.Package.from_binary(message) do
       {:ok, {package, rest}} ->
+        true = 255 >= byte_size(package.payload)
         handle_package(package, socket)
         handle_data(rest, socket, %State{})
 
@@ -32,7 +33,7 @@ defmodule GoblinServer.Handler do
 
   @impl ThousandIsland.Handler
   def handle_error(reason, %ThousandIsland.Socket{} = _socket, %State{} = _state) do
-    IO.inspect(["Error:", reason])
+    IO.puts("Error: #{reason}")
   end
 
   defp handle_package(%Package{} = package, %ThousandIsland.Socket{} = socket) do
