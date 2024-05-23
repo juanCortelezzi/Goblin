@@ -17,15 +17,10 @@ defmodule GoblinServer.Handler do
   def handle_data(data, %ThousandIsland.Socket{} = socket, %State{} = state) do
     message = state.previous <> data
 
-    IO.inspect(["Processing Message:", message])
-
-    case parse_packets(message) do
-      {:ok, packets} ->
-        for packet <- packets do
-          handle_packet(packet, socket, state)
-        end
-
-        {:continue, %State{}}
+    case GoblinServer.Packet.from_binary(message) do
+      {:ok, {packet, rest}} ->
+        handle_packet(packet, socket)
+        handle_data(rest, socket, %State{})
 
       {:error, :payload_incomplete} ->
         {:continue, %State{previous: message}}
@@ -40,20 +35,7 @@ defmodule GoblinServer.Handler do
     IO.inspect(["Error:", reason])
   end
 
-  defp parse_packets(data, packets \\ []) when is_binary(data) do
-    case GoblinServer.Packet.from_binary(data) do
-      {:ok, {packet, <<>>}} ->
-        {:ok, Enum.reverse([packet | packets])}
-
-      {:ok, {packet, rest}} ->
-        parse_packets(rest, [packet | packets])
-
-      other ->
-        other
-    end
-  end
-
-  defp handle_packet(%Packet{} = packet, %ThousandIsland.Socket{} = socket, %State{} = _state) do
+  defp handle_packet(%Packet{} = packet, %ThousandIsland.Socket{} = socket) do
     IO.inspect(["Received:", packet])
     payload = GoblinServer.Packet.to_binary(packet)
     :ok = ThousandIsland.Socket.send(socket, payload)

@@ -18,7 +18,7 @@ defmodule GoblinServer.Packet do
   end
 
   @version 1
-  @package_types [:echo, :location]
+  @packet_types [:echo, :location]
 
   def from_binary(<<version::integer>> <> _)
       when version != @version,
@@ -26,7 +26,7 @@ defmodule GoblinServer.Packet do
 
   def from_binary(<<@version, type::integer>> <> _)
       when type < 0
-      when type >= length(@package_types),
+      when type >= length(@packet_types),
       do: {:error, :invalid_type}
 
   def from_binary(<<
@@ -47,17 +47,17 @@ defmodule GoblinServer.Packet do
           payload::binary-size(length)
         >> <> rest
       ) do
-    type = Enum.at(@package_types, type)
+    type = Enum.at(@packet_types, type)
 
     with {:ok, payload} <- payload_from_binary(type, payload) do
-      package = %GoblinServer.Packet{
+      packet = %GoblinServer.Packet{
         version: @version,
         type: type,
         length: length,
         payload: payload
       }
 
-      {:ok, {package, rest}}
+      {:ok, {packet, rest}}
     end
   end
 
@@ -70,9 +70,9 @@ defmodule GoblinServer.Packet do
         payload: payload
       }) do
     payload = payload_to_binary(type, payload)
-    type = Enum.find_index(@package_types, fn e -> e == type end)
+    type = Enum.find_index(@packet_types, fn e -> e == type end)
 
-    package = <<
+    packet = <<
       version::integer-size(8),
       type::integer-size(8),
       length::integer-size(8),
@@ -82,12 +82,12 @@ defmodule GoblinServer.Packet do
     # Ensure the length is correct (sanity check)
     ^length = byte_size(payload)
 
-    package
+    packet
   end
 
   # Payload from binary
 
-  def payload_from_binary(type, _) when type not in @package_types do
+  def payload_from_binary(type, _) when type not in @packet_types do
     {:err, :invalid_payload}
   end
 
