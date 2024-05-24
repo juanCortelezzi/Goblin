@@ -1,8 +1,10 @@
 defmodule GoblinServer.Application do
+  require Logger
+
   use Application
 
   def start(_type, _args) do
-    IO.puts("Starting application...")
+    Logger.info("Starting application...")
     GoblinServer.Supervisor.start_link([])
   end
 end

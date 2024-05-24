@@ -1,12 +1,15 @@
-defmodule GoblinServer.Handler.State do
-  defstruct previous: <<>>
-end
-
 defmodule GoblinServer.Handler do
+  require Logger
+
   use ThousandIsland.Handler
+  use TypedStruct
 
   alias GoblinServer.Handler.State
   alias GoblinServer.Package
+
+  typedstruct module: State do
+    field(:previous, binary(), default: <<>>)
+  end
 
   @impl ThousandIsland.Handler
   def handle_connection(_, _) do
@@ -33,7 +36,7 @@ defmodule GoblinServer.Handler do
 
   @impl ThousandIsland.Handler
   def handle_error(reason, %ThousandIsland.Socket{} = _socket, %State{} = _state) do
-    IO.puts("Error: #{reason}")
+    Logger.error(%{reason: reason})
   end
 
   defp handle_package(%Package{} = package, %ThousandIsland.Socket{} = socket) do
