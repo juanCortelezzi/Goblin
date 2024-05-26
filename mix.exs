@@ -1,4 +1,4 @@
-defmodule GoblinServer.MixProject do
+defmodule Server.MixProject do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule GoblinServer.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {GoblinServer.Application, []}
+      mod: {Server.Application, []}
     ]
   end
 

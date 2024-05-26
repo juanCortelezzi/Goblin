@@ -1,13 +1,13 @@
-defmodule GoblinServer.Handler do
+defmodule Server.Handler do
   require Logger
 
   use ThousandIsland.Handler
   use TypedStruct
 
-  alias GoblinServer.Handler.State
-  alias GoblinServer.Package
+  alias Server.Handler.State
+  alias Server.Package
 
-  typedstruct module: State do
+  typedstruct module: State, enforce: true do
     field(:previous, binary(), default: <<>>)
   end
 
@@ -20,7 +20,7 @@ defmodule GoblinServer.Handler do
   def handle_data(data, %ThousandIsland.Socket{} = socket, %State{} = state) do
     message = state.previous <> data
 
-    case GoblinServer.Package.from_binary(message) do
+    case Server.Package.from_binary(message) do
       {:ok, {package, rest}} ->
         true = 255 >= byte_size(package.payload)
         handle_package(package, socket)
@@ -40,7 +40,7 @@ defmodule GoblinServer.Handler do
   end
 
   defp handle_package(%Package{} = package, %ThousandIsland.Socket{} = socket) do
-    payload = GoblinServer.Package.to_binary(package)
+    payload = Server.Package.to_binary(package)
     :ok = ThousandIsland.Socket.send(socket, payload)
   end
 end

@@ -1,14 +1,14 @@
-defmodule GoblinServer.Package do
+defmodule Server.Package do
   @moduledoc ~S"""
   Package and payload definitions for the Goblin protocol.
 
   ## Examples
 
-    iex> GoblinServer.Package.from_binary(<<1, 0, 0>>)
-    {:ok, {%GoblinServer.Package{version: 1, type: :echo, length: 0, payload: ""}, ""}}
+    iex> Server.Package.from_binary(<<1, 0, 0>>)
+    {:ok, {%Server.Package{version: 1, type: :echo, length: 0, payload: ""}, ""}}
 
-    iex> GoblinServer.Package.from_binary(<<1, 0, 2, "hi">>)
-    {:ok, {%GoblinServer.Package{version: 1, type: :echo, length: 2, payload: "hi"}, ""}}
+    iex> Server.Package.from_binary(<<1, 0, 2, "hi">>)
+    {:ok, {%Server.Package{version: 1, type: :echo, length: 2, payload: "hi"}, ""}}
 
   """
 
@@ -83,7 +83,7 @@ defmodule GoblinServer.Package do
     type = Enum.at(@package_types, type)
 
     with {:ok, payload} <- payload_from_binary(type, payload) do
-      package = %GoblinServer.Package{
+      package = %Server.Package{
         version: @version,
         type: type,
         length: length,
@@ -135,7 +135,7 @@ defmodule GoblinServer.Package do
   # To binary
 
   @spec to_binary(t()) :: binary()
-  def to_binary(%GoblinServer.Package{
+  def to_binary(%Server.Package{
         version: version,
         type: type,
         length: length,

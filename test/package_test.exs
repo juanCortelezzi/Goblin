@@ -1,8 +1,8 @@
-defmodule GoblinServer.PackageTest do
+defmodule Server.PackageTest do
   use ExUnit.Case, async: true
-  doctest GoblinServer.Package
+  doctest Server.Package
 
-  alias GoblinServer.Package
+  alias Server.Package
 
   test "error on invalid package" do
     assert {:error, :invalid_package} == Package.from_binary(<<>>)
