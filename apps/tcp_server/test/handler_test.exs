@@ -1,4 +1,4 @@
-defmodule GoblinTest do
+defmodule TcpServerTest do
   use ExUnit.Case, async: false
   @host ~c"localhost"
   @port 1234

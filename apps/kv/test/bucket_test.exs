@@ -1,8 +1,8 @@
-defmodule Server.Registry.BucketTest do
+defmodule KV.BucketTest do
   use ExUnit.Case, async: false
-  doctest Server.Package
+  doctest KV.Bucket
 
-  alias Server.Registry.Bucket
+  alias KV.Bucket
 
   setup do
     bucket = start_supervised!({Bucket, %{}})

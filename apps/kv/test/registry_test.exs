@@ -1,11 +1,12 @@
-defmodule Server.RegistryTest do
+defmodule KV.RegistryTest do
   use ExUnit.Case, async: false
-  doctest Server.Package
+  doctest KV.Registry
 
-  alias Server.Registry
+  alias KV.Registry
+  alias KV.Bucket
 
   setup do
-    registry = start_supervised!(Registry)
+    registry = start_supervised!({Registry, %{}})
     %{registry: registry}
   end
 
@@ -22,9 +23,9 @@ defmodule Server.RegistryTest do
 
   test "get bucket", %{registry: registry} do
     bucket = Registry.get(registry, "shopping")
-    Registry.Bucket.set(bucket, "cart", %{"milk" => 1})
+    Bucket.set(bucket, "cart", %{"milk" => 1})
 
     assert bucket == Registry.get(registry, "shopping")
-    assert %{"milk" => 1} == Registry.Bucket.get(bucket, "cart")
+    assert %{"milk" => 1} == Bucket.get(bucket, "cart")
   end
 end

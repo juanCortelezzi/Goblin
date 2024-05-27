@@ -1,10 +1,10 @@
-defmodule Server.Registry do
+defmodule KV.Registry do
   require Logger
 
   use GenServer
   use TypedStruct
 
-  alias Server.Registry.Bucket
+  alias KV.Bucket
 
   typedstruct module: State, enforce: true do
     field(:buckets, %{String.t() => pid()}, default: %{})

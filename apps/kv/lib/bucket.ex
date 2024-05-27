@@ -1,4 +1,4 @@
-defmodule Server.Registry.Bucket do
+defmodule KV.Bucket do
   use Agent, restart: :temporary
 
   def start_link(initial_value) when is_map(initial_value) do
