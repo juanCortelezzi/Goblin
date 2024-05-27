@@ -1,4 +1,4 @@
-defmodule Server.Router do
+defmodule WsServer.Router do
   use Plug.Router
 
   plug(Plug.Logger)
@@ -7,7 +7,7 @@ defmodule Server.Router do
 
   get "/ws" do
     conn
-    |> WebSockAdapter.upgrade(Server.Handler, [], timeout: 60_000)
+    |> WebSockAdapter.upgrade(WsServer.Handler, [], timeout: 60_000)
     |> halt()
   end
 

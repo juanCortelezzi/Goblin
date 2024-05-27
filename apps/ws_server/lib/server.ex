@@ -1,4 +1,4 @@
-defmodule Server.Handler do
+defmodule WsServer.Handler do
   @behaviour WebSock
 
   require Logger

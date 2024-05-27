@@ -1,9 +1,9 @@
-defmodule Server.MixProject do
+defmodule WSServer.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :server,
+      app: :ws_server,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -19,7 +19,7 @@ defmodule Server.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Server.Application, []}
+      mod: {WsServer.Application, []}
     ]
   end
 

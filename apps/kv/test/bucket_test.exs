@@ -1,5 +1,5 @@
 defmodule KV.BucketTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   doctest KV.Bucket
 
   alias KV.Bucket

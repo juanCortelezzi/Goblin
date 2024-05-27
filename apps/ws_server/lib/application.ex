@@ -1,4 +1,4 @@
-defmodule Server.Application do
+defmodule WsServer.Application do
   @moduledoc false
 
   use Application
@@ -6,9 +6,9 @@ defmodule Server.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Bandit, plug: Server.Router, scheme: :http, port: 4000}
+      {Bandit, plug: WsServer.Router, scheme: :http, port: 4000}
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one, name: Server.Supervisor)
+    Supervisor.start_link(children, strategy: :one_for_one, name: WsServer.Supervisor)
   end
 end

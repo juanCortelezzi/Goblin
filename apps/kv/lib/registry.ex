@@ -13,7 +13,7 @@ defmodule KV.Registry do
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+    GenServer.start_link(__MODULE__, opts)
   end
 
   @spec create(pid(), String.t()) :: {:ok, pid()} | :error
@@ -28,7 +28,7 @@ defmodule KV.Registry do
 
   @spec fetch(pid(), String.t()) :: {:ok, pid()} | :error
   def fetch(registry, name) when is_pid(registry) do
-    GenServer.call(__MODULE__, {:fetch, name})
+    GenServer.call(registry, {:fetch, name})
   end
 
   @spec remove(pid(), String.t()) :: :ok
@@ -37,7 +37,7 @@ defmodule KV.Registry do
   end
 
   @impl true
-  def init(_elements) do
+  def init(_) do
     {:ok, %State{}}
   end
 
@@ -45,7 +45,7 @@ defmodule KV.Registry do
   def handle_call({:create, name}, _from, %State{} = state)
       when not is_map_key(state.buckets, name) do
     Logger.debug("creating bucket: #{name}")
-    {:ok, bucket} = DynamicSupervisor.start_child(Bucket.Supervisor, {Bucket, %{}})
+    {:ok, bucket} = DynamicSupervisor.start_child(KV.BucketSupervisor, {Bucket, %{}})
     ref = Process.monitor(bucket)
     refs = Map.put_new(state.references, ref, name)
     buckets = Map.put_new(state.buckets, name, bucket)
@@ -63,7 +63,7 @@ defmodule KV.Registry do
     case Map.fetch(state.buckets, name) do
       :error ->
         Logger.debug("creating bucket: #{name}")
-        {:ok, bucket} = DynamicSupervisor.start_child(Bucket.Supervisor, {Bucket, %{}})
+        {:ok, bucket} = DynamicSupervisor.start_child(KV.BucketSupervisor, {Bucket, %{}})
         ref = Process.monitor(bucket)
         refs = Map.put_new(state.references, ref, name)
         buckets = Map.put_new(state.buckets, name, bucket)
@@ -78,6 +78,7 @@ defmodule KV.Registry do
   def handle_call({:fetch, name}, _from, %State{} = state) do
     case Map.fetch(state.buckets, name) do
       :error ->
+        Logger.debug("fetch could not find bucket: #{name}")
         {:reply, :error, state}
 
       {:ok, bucket} ->
