@@ -79,7 +79,8 @@ defmodule Proto do
           length::integer,
           payload::binary-size(length)
         >> <> rest
-      ) do
+      )
+      when type >= 0 and type < length(@package_types) do
     type = Enum.at(@package_types, type)
 
     with {:ok, payload} <- payload_from_binary(type, payload) do

@@ -35,7 +35,8 @@ defmodule TcpServerTest do
       create_big_ass_message(<<1, 0, 255, 2>>),
       create_big_ass_message(<<1, 0, 255, 3>>),
       create_big_ass_message(<<1, 0, 255, 4>>),
-      create_big_ass_message(<<1, 0, 255, 5>>)
+      create_big_ass_message(<<1, 0, 255, 5>>),
+      create_big_ass_message(<<1, 0, 255, 6>>)
     ]
 
     # bam = Big.Ass.Message

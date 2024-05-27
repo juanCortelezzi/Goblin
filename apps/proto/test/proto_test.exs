@@ -3,28 +3,26 @@ defmodule ProtoTest do
   doctest Proto
 
   test "error on invalid package" do
-    assert {:error, :invalid_package} == Proto.from_binary(<<>>)
-    assert {:error, :invalid_package} == Proto.from_binary(<<1, 0>>)
+    assert {:error, :invalid_package} = Proto.from_binary(<<>>)
+    assert {:error, :invalid_package} = Proto.from_binary(<<1, 0>>)
   end
 
   test "error on invalid version" do
-    assert {:error, :invalid_version} == Proto.from_binary(<<0, 0, 0>>)
+    assert {:error, :invalid_version} = Proto.from_binary(<<0, 0, 0>>)
   end
 
   test "error on invalid message type" do
-    assert {:error, :invalid_type} == Proto.from_binary(<<1, 10, 0>>)
+    invalid_type = length(Proto.package_types()) + 1
+    assert {:error, :invalid_type} = Proto.from_binary(<<1, invalid_type, 0>>)
   end
 
   test "error on invalid payload length" do
-    assert {:error, :payload_incomplete} == Proto.from_binary(<<1, 0, 1>>)
+    assert {:error, :payload_incomplete} = Proto.from_binary(<<1, 0, 1>>)
   end
 
   test "package overflow" do
     package = %Proto{version: 1, type: :echo, length: 1, payload: "h"}
-    rest = "i"
-
-    assert {:ok, {package, rest}} ==
-             Proto.from_binary(<<1, 0, 1, "hi">>)
+    assert {:ok, {^package, "i"}} = Proto.from_binary(<<1, 0, 1, "hi">>)
   end
 
   test "parsing location package" do
@@ -40,11 +38,7 @@ defmodule ProtoTest do
       }
     }
 
-    binary = Proto.to_binary(package)
-    {:ok, {new_package, rest}} = Proto.from_binary(binary)
-
-    assert package == new_package
-    assert <<>> == rest
+    assert {:ok, {^package, <<>>}} = package |> Proto.to_binary() |> Proto.from_binary()
   end
 
   test "parsing echo package" do
@@ -55,10 +49,6 @@ defmodule ProtoTest do
       payload: <<1, 2, 3, 4, 5>>
     }
 
-    binary = Proto.to_binary(package)
-    {:ok, {new_package, rest}} = Proto.from_binary(binary)
-
-    assert new_package == package
-    assert <<>> == rest
+    assert {:ok, {^package, <<>>}} = package |> Proto.to_binary() |> Proto.from_binary()
   end
 end
